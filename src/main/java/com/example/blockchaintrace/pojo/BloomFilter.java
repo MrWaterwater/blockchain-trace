@@ -1,7 +1,5 @@
 package com.example.blockchaintrace.pojo;
 
-import lombok.NoArgsConstructor;
-
 import java.io.Serializable;
 import java.util.BitSet;
 import java.util.concurrent.atomic.AtomicInteger;

@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class BlockchainTraceApplication {
+    public static KeyPairs keyPairs = KeyPairs.getInstance();
     public static void main(String[] args) throws Exception {
         SpringApplication.run(BlockchainTraceApplication.class, args);
         BlockChain.getInstance();
