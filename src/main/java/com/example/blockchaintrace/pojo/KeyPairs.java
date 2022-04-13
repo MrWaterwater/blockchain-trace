@@ -1,5 +1,6 @@
 package com.example.blockchaintrace.pojo;
 
+import com.example.blockchaintrace.util.FileUtils;
 import com.example.blockchaintrace.util.RocksDBUtils;
 import com.example.blockchaintrace.util.SerializeUtils;
 import com.google.gson.Gson;
@@ -34,33 +35,16 @@ public class KeyPairs implements Serializable {
             throw new RuntimeException(e);
         }
     }
-//    public static KeyPairs getInstance(){
-//        if(instance == null){
-//            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-//            instance = new KeyPairs();
-//        }
-//        System.out.println(instance.toString());
-//        return instance;
-//    }
-
     public static KeyPairs getInstance(){
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        if(instance == null){
-            try {
-                byte[] keyPairsKey = SerializeUtils.serialize("Keypair");
-                byte[] keyPairsBytes = RocksDBUtils.getInstance().getRocksDB().get(keyPairsKey);
-                if(keyPairsBytes != null){
-                    String Json = (String) SerializeUtils.deserialize(keyPairsBytes);
-                    instance = gson.fromJson(Json, KeyPairs.class);
-                }else {
-                    instance = new KeyPairs();
-                    String Json = gson.toJson(instance);
-                    RocksDBUtils.getInstance().getRocksDB().put(keyPairsKey, SerializeUtils.serialize(Json));
-                }
-            }catch (RocksDBException e) {
-                throw new RuntimeException("Fail to init KeyPair!", e);
-            }
+        FileUtils fileUtils = new FileUtils("key.txt");
+        if(fileUtils.getObject() != null){
+            instance = fileUtils.getObject();
+            return instance;
+        }else{
+            instance = new KeyPairs();
+            fileUtils.saveObject(instance);
+            return instance;
         }
-        return instance;
     }
 }

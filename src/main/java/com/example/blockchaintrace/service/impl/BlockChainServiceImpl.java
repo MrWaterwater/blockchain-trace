@@ -34,8 +34,7 @@ public class BlockChainServiceImpl implements BlockChainService {
         String date = new GsonBuilder().setPrettyPrinting().create().toJson(traceVO);
         information.setSignature(StringUtils.applyECDSASig(KeyPairs.getInstance().getPrivateKey(), date));
         informationArrayList.add(information);
-
-        if(informationArrayList.size() >= 4)
+        if(informationArrayList.size() >= 64)
             addBlock();
     }
 
@@ -64,10 +63,10 @@ public class BlockChainServiceImpl implements BlockChainService {
     @Override
     public String find(String serialNumber) throws Exception {
         MerkleTree.Info info = findHash(serialNumber);
-        Trace trace = mapper.getTrace(info.getHash());
-        if(trace == null){
+        if(info == null){
             return "获取失败！";
         }
+        Trace trace = mapper.getTrace(info.getHash());
         TraceVO traceVO = new TraceVO();
         BeanUtils.copyProperties(trace,traceVO);
         traceVO.setSerialNumber(serialNumber);
