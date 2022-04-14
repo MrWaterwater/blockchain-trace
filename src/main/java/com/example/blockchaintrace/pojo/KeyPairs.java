@@ -6,7 +6,6 @@ import com.example.blockchaintrace.util.SerializeUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.Data;
-import org.rocksdb.RocksDBException;
 
 import java.io.Serializable;
 import java.security.*;

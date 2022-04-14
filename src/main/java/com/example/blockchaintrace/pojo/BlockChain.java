@@ -15,14 +15,6 @@ public class BlockChain implements Serializable {
         this.lastBlockHash = lastBlockHash;
     }
 
-    public String getLastBlockHash() {
-        return lastBlockHash;
-    }
-    public void setLastBlockHash(String lastBlockHash){
-        this.lastBlockHash = lastBlockHash;
-    }
-
-
     public static BlockChain getInstance() throws Exception {
         String lastBlockHash = RocksDBUtils.getInstance().getLastBlockHash();
         if (StringUtils.isBlank(lastBlockHash)) {
