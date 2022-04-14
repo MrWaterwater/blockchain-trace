@@ -39,15 +39,15 @@ public class BlockChainServiceImpl implements BlockChainService {
 
     @Override
     public void addBlock() throws Exception {
-        if(BlockUtils.isChainValid(RocksDBUtils.getInstance().getLastBlockHash())){
+        if(BlockUtils.isChainValid()){
             ArrayList<Information> arrayList = new ArrayList<>();
             for(Information information:this.informationArrayList){
                 arrayList.add(information);
             }
             Block block = new Block(RocksDBUtils.getInstance().getLastBlockHash(), arrayList);
-            BlockChain.getInstance().setLastBlockHash(block.getHash());
             RocksDBUtils.getInstance().putBlock(block);
             RocksDBUtils.getInstance().putLastBlockHash(block.getHash());
+            BlockchainTraceApplication.blocks.add(block);
             this.informationArrayList.clear();
 //            for(Trace trace:this.traceArrayList){
 //                mapper.addTrace(trace);
@@ -79,26 +79,43 @@ public class BlockChainServiceImpl implements BlockChainService {
 
     private Information findHash(String serialNumber) throws Exception {
         String lastHash = RocksDBUtils.getInstance().getLastBlockHash();
-        BlockChainIterator blockChainIterator = null;
-        String previousHash = null;
-        for (blockChainIterator = BlockChainIterator.getBlockChainIterator(lastHash); blockChainIterator.hashNext();blockChainIterator=BlockChainIterator.getBlockChainIterator(previousHash)){
-            Block block = blockChainIterator.getCurrentBlock();
-            previousHash = block.getPreviousHash();
-            if(block.getFilter().contains(serialNumber)){
-                Block.MerkleTree tree = block.getMerkleTree();
+        for(int i = BlockchainTraceApplication.blocks.size()-1; i>=0 ; i--) {
+            Block temp = BlockchainTraceApplication.blocks.get(i);
+            if(temp.getFilter().contains(serialNumber)){
+                Block.MerkleTree tree = temp.getMerkleTree();
                 Block.MerkleTree.Node root = tree.getRoot();
-                while (root.getOrLeafNode() != 1){
+                while (root.getOrLeafNode()!=1){
                     if(root.getLeft().getBloomFilter().contains(serialNumber)){
                         root = root.getLeft();
                         continue;
                     }
-                    if (root.getRight().getBloomFilter().contains(serialNumber)){
+                    if(root.getRight().getBloomFilter().contains(serialNumber)){
                         root = root.getRight();
                     }
                 }
                 return root.getInformation();
             }
         }
+//        BlockChainIterator blockChainIterator = null;
+//        String previousHash = null;
+//        for (blockChainIterator = BlockChainIterator.getBlockChainIterator(lastHash); blockChainIterator.hashNext();blockChainIterator=BlockChainIterator.getBlockChainIterator(previousHash)){
+//            Block block = blockChainIterator.getCurrentBlock();
+//            previousHash = block.getPreviousHash();
+//            if(block.getFilter().contains(serialNumber)){
+//                Block.MerkleTree tree = block.getMerkleTree();
+//                Block.MerkleTree.Node root = tree.getRoot();
+//                while (root.getOrLeafNode() != 1){
+//                    if(root.getLeft().getBloomFilter().contains(serialNumber)){
+//                        root = root.getLeft();
+//                        continue;
+//                    }
+//                    if (root.getRight().getBloomFilter().contains(serialNumber)){
+//                        root = root.getRight();
+//                    }
+//                }
+//                return root.getInformation();
+//            }
+//        }
         return null;
     }
 }
