@@ -20,4 +20,12 @@ public class TestController {
     public String find(@PathVariable String serialNumber) throws Exception {
         return service.find(serialNumber);
     }
+    @RequestMapping(value = "add",method = RequestMethod.GET)
+        public void addBlock() {
+            try {
+                service.addBlock();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 }
