@@ -3,37 +3,60 @@ package com.example.blockchaintrace.service.impl;
 import com.example.blockchaintrace.BlockchainTraceApplication;
 import com.example.blockchaintrace.pojo.*;
 import com.example.blockchaintrace.service.BlockChainService;
-import com.example.blockchaintrace.util.BlockChainIterator;
 import com.example.blockchaintrace.util.BlockUtils;
 import com.example.blockchaintrace.util.RocksDBUtils;
 import com.example.blockchaintrace.util.StringUtils;
 import com.google.gson.GsonBuilder;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 @Service
 public class BlockChainServiceImpl implements BlockChainService {
 
-    private ArrayList<TraceVO> traceArrayList = new ArrayList<>();
+    private ArrayList<Trace> traceArrayList = new ArrayList<>();
     private ArrayList<Information> informationArrayList = new ArrayList<>();
+    private HashMap<String ,Product> productMap = new HashMap<>();
+    private HashMap<String, Distribute> distributeMap = new HashMap<>();
+
+    public BlockChainServiceImpl(){
+
+    }
 
     @Override
-    public void addTrace(TraceVO traceVO) throws Exception {
-//        Trace trace = new Trace();
-//        BeanUtils.copyProperties(traceVO,trace);
-        Information information = new Information(traceVO.getSerialNumber());
-//        trace.setHash(information.getHash());
-//        trace.setRecordTimeStamp(Long.toString(new Date().getTime()));
-//        this.traceArrayList.add(trace);
-        traceVO.setRecordTimeStamp(Long.toString(new Date().getTime()));
-        String date = new GsonBuilder().setPrettyPrinting().create().toJson(traceVO);
+    public void addProduct(Product product) {
+        productMap.put(product.getSerialNumber(),product);
+    }
+
+    @Override
+    public void addDistribute(Distribute distribute) {
+        distributeMap.put(distribute.getSerialNumber(),distribute);
+    }
+
+    @Override
+    public void addRetail(Retail retail) throws Exception {
+        Trace trace = new Trace();
+        Product product = productMap.get(retail.getSerialNumber());
+        Distribute distribute = distributeMap.get(retail.getSerialNumber());
+        productMap.remove(retail.getSerialNumber());
+        distributeMap.remove(retail.getSerialNumber());
+        BeanUtils.copyProperties(product,trace);
+        BeanUtils.copyProperties(distribute,trace);
+        BeanUtils.copyProperties(retail,trace);
+        addTrace(trace);
+    }
+
+    @Override
+    public void addTrace(Trace trace) throws Exception {
+        Information information = new Information(trace.getSerialNumber());
+        trace.setRecordTimeStamp(Long.toString(new Date().getTime()));
+        String date = new GsonBuilder().setPrettyPrinting().create().toJson(trace);
         information.setData(date);
         information.setSignature(StringUtils.applyECDSASig(BlockchainTraceApplication.keyPairs.getPrivateKey(), date));
         informationArrayList.add(information);
-        if(informationArrayList.size() >= 4)
+        if(informationArrayList.size() >= 64)
             addBlock();
     }
 

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TraceVO {
+public class Trace {
     private String serialNumber;
     private String productName;
     private String productPlace;
