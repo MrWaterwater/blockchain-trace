@@ -57,7 +57,7 @@
 
   目前主流区块链系统的区块基础结构[10]如图1所示，在区块头中包含三组数据。第一组是通过哈希计算得出的Current Hash和指向父区块的Pre Hash，其值为父区块的Current Hash。通过Current Hash和Pre Hash链接区块链中的当前区块和前一区块；第二组由随机数（Nonce）、难度目标（Bit）和时间戳组成。这组数据与区块挖掘有关。随机值定义了区块挖掘难度，难度目标是指给定难度目标的Hash值，时间戳是指区块生成的时间，精确到秒；第三组数据是Merkle树根，它是本区块所包含的所有交易对应的Hash值两两循环计算得出的Hash值。
 
-![avatar](C:\Users\armstrong\Desktop\blockchain-trace\picture\1.png)    
+![avatar](picture\1.png)    
 图 1 比特币区块结构图
 
   在进行交易验证时可以通过计算Merkle Tree Root的hash值来确认区块中的数据是否合法，有无被篡改。假设交易Tx1交易出了问题时，则可以通过Merkle Tree Root到Hash1 2到Hash1最后到Tx1的这条Merkle proof来进行非法数据的定位。
@@ -68,7 +68,7 @@
 
   如图2所示，为区块链结构。区块链是由区块的Hash值相链接一起的一种链表结构。当前的区块链索引结构只支持相对简单的查询，并且只支持基于唯一标识Hash值的查询。在区块链的链表结构中的查询某一数据最坏情况需要历遍整条区块链的数据才能查到数据，最优的情况只需要访问最新区块就可以查到，故其时间复杂度为O(N)，其中N为区块数量。找到对应区块后需要历遍区块体中的Merkle树结构的叶子结点，最后找到对应数据。在历遍Merkle树叶子结点需要的时间复杂度为O(2(n-1))其中n为交易数量。故总的查询时间复杂度为O(2(n-1)N)，忽略常数项则查询时间复杂度为O(nN)。
 
-![avatar](C:\Users\armstrong\Desktop\blockchain-trace\picture\2.png)
+![avatar](picture\2.png)
 
 图 2 区块链结构示意图
 
@@ -106,7 +106,7 @@ Ensure: Details of transaction result
 
   区块链的链表结构主要是通过前后区块的Hash指针值进行匹配链接，是为了保证区块链的不可篡改性与安全性。而区块对应的Hash值是通过区块内部本身数据计算得出的，再加上区块链上的区块是按照时间顺序添加到区块链上的。由此可以将“链”这一结构抽象化，把区块视为一个整体对象，区块链为一个包含合法区块的可变长数组。如图3所示：
 
-![avatar](C:\Users\armstrong\Desktop\blockchain-trace\picture\3.png)
+![avatar](picture\3.png)
 
 图 3 区块链结构转换示意图
 
@@ -130,18 +130,18 @@ Merkle树在很多应用场景下都有着极为亮眼的性能表现，具体�
 
   第三，零知识证明：如下图4所示，可以通过Merkle proof证明数据集（L1，L2，L3，L4）的某个数据L2存在，而不用暴露其他数据。
 
-![avatar](C:\Users\armstrong\Desktop\blockchain-trace\picture\4.png)
+![avatar](picture\4.png)
 图 4  Merkle树示例图
 
 为了优化区块链的溯源查询性能，本文对区块链中Merkle树的结构进行了优化，引入了布隆过滤器（Bloom Filter）[13]这一数据结构。
 
   Bloom Filter本质上是一个很长的二进制向量和一系列随机映射函数，用于快速确定一个元素是否在一个集合中。在初始状态Bloom Filter的所有位都被置为0，如下图5所示：
 
-![avatar](C:\Users\armstrong\Desktop\blockchain-trace\picture\5.png) 
+![avatar](picture\5.png) 
 
 图 5 Bloom Filter初始状态
 
-![avatar](C:\Users\armstrong\Desktop\blockchain-trace\picture\6.png)
+![avatar](picture\6.png)
 
 图 6 Bloom Filter映射数据到位数组示意图
 
@@ -151,7 +151,7 @@ Merkle树在很多应用场景下都有着极为亮眼的性能表现，具体�
 
 优化后Merkle树结构如图7所示，其中BF为Bloom Filter简写，BF（1,8）表示该结点的Bloom Filter完成了交易Tx1到Tx8信息到位数组的映射。（Tx1…Tx8)为交易数据列表，（Hash1…Hash8）为叶子结点。该Merkle树的叶子结点存储真实数据对应的hash值，非叶子结点存储其左右子结点计算得出的hash值。
 
-![avatar](C:\Users\armstrong\Desktop\blockchain-trace\picture\7.png)
+![avatar](picture\7.png)
 
 图 7 结合Bloom Filter的Merkle树结构
 
@@ -216,18 +216,18 @@ Ensure: Details of transaction result
 
   在商品溯源场景中，业务主要由生产商、分销商、零售商参与，生产商与分销商将数据写入该区块链系统的对应“缓存池”中，当零售商成功将商品售卖出去时则，将零售数据与“缓存池”中对应的商品数据组合成完整的溯源数据信息，并将其上链。具体业务流程如图8所示：
 
-![avatar](C:\Users\armstrong\Desktop\blockchain-trace\picture\8.png)
+![avatar](picture\8.png)
 
 图 8 商品溯源查询系统业务流程示意图
 
   在生产区块与构建Merkle树中，由于SHA-256算法具有单向性与独立性。本文采用了SHA-256[15]这一哈希加密算法，以保证数据的完整性。具体加密流程如图9所示：
 
-![avatar](C:\Users\armstrong\Desktop\blockchain-trace\picture\9.png)
+![avatar](picture\9.png)
 
 图 9 哈希加密流程图
 
   同时在数据上链过程中，本文采用了ECDSA算法[16]这一非对称加密算法，给每一个环节的数据加了一个签名，主要进行生产商、分销商、零售商与普通用户的角色判定，证明消息的来源。具体流程如图10所示。
-![avatar](C:\Users\armstrong\Desktop\blockchain-trace\picture\10.png)
+![avatar](picture/10.png)
 图 10 数字签名验证流程图
 
 ### 2.1.2 系统总体架构
@@ -236,7 +236,7 @@ Ensure: Details of transaction result
 
 在本区块链系统中，取消了“挖矿”这一POW共识机制[18]，依靠数字签名进行用户权限的认证，新增区块的判断由系统本身设定值，当交易量到达一定值时自动验证数据并生成区块。在利用RocksDB将数据以物理链式结构写入本地文件，加载区块链时将RocksDB中的数据写入运行内存的一个动态数组中，将物理的链表结构变为抽象概念上的链式结构。
 
-![avatar](C:\Users\armstrong\Desktop\blockchain-trace\picture\11.png)
+![avatar](picture/11.png)
 
 图 11 本系统架构示意图
 
@@ -290,17 +290,17 @@ Ensure: Details of transaction result
   设置一定数量的区块和数据集，通过本地实验得出以下数据图表，展示了传统溯源查询性能与优化后溯源查询性能的差距。根据图12、图13、图14所示，该方案对区块链溯源查询性能有着不错的效率提升，同时额外耗费的Merkle树构建成本低。
 
 如图12所示，为固定每区块包含16个交易数据时，查询时间与区块数量关系折线图。
-![avatar](C:\Users\armstrong\Desktop\blockchain-trace\picture\12.png)
+![avatar](picture\12.png)
 图 12 查询时间与区块数量关系折线图
 
 如图13所示，该图为Merkle树构建成本与当前区块包含交易数量关系折线图。
 
-![avatar](C:\Users\armstrong\Desktop\blockchain-trace\picture\13.png)
+![avatar](picture\13.png)
 
 图 13 Merkle树构建成本与交易数量关系折线图
 
 如图14所示，为固定16个区块时，查询时间与交易数量关系折线图。     
 
-![avatar](C:\Users\armstrong\Desktop\blockchain-trace\picture\14.png)
+![avatar](picture\14.png)
 
 图 14 查询时间与交易数量关系折线图
